@@ -1,5 +1,5 @@
 
-# 💻 Computer-Use Agents Evaluation Hub
+# 💻 Computer-Use Agents Evaluation
 
 This repository contains all relevant code and material for our evaluation of autonomous computer-use agents on a clinical software environment. It links agent implementations, task definitions, and the experimental setup used for our benchmarks of GUI interaction capabilities in a Hospital Information System (HIS).
 
@@ -8,11 +8,11 @@ This repository is intended to:
 - Enable reproducibility and comparison of different computer-use agent architectures
 - Support research on autonomous GUI interaction in clinical software systems
 
-
+---
 ## 🤖 Computer-Use Agents
 Two autonomous agents were evaluated:
 
-### Agent A ([omniparser_mcp branch](https://github.com/TruhnLab/computer-use-agents/tree/omniparser_mcp))
+### Agent A ([omniparser_mcp](https://github.com/TruhnLab/computer-use-agents/tree/omniparser_mcp) branch)
 - GUI perception handled locally via OmniParser
 - Screenshots converted into structured textual representations
 - Reduced model token usage, increased local computation
