@@ -1,3 +1,5 @@
+> Credits go to Frederik Hauke, Marvin Gazibaric, Hanna Kreutzer and Patrick Wienholt
+
 # HospitalRun Navigation Agent
 
 AI-powered agent for navigating and interacting with HospitalRun using Azure OpenAI Computer Use and OCR. This project uses the [computer-use-preview model from OpenAI](https://platform.openai.com/docs/guides/tools-computer-use) for advanced computer interaction capabilities.
