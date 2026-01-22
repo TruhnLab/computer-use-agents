@@ -20,8 +20,6 @@ AI-powered agent for navigating and interacting with HospitalRun using Azure Ope
 	```
 
 3. Configure Azure OpenAI in `.env`:
-
-2. Configure Azure OpenAI in `.env`:
 ```env
 AZURE_OPENAI_ENDPOINT=your_endpoint
 AZURE_OPENAI_API_KEY=your_key
@@ -29,7 +27,7 @@ AZURE_OPENAI_API_VERSION=2025-03-01-preview
 AZURE_OPENAI_DEPLOYMENT=your_deployment
 ```
 
-3. Install Tesseract OCR:
+4. Install Tesseract OCR:
 ```bash
 # macOS
 brew install tesseract
