@@ -1,0 +1,25 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+weights/icon_caption_blip2
+weights/icon_caption_florence
+weights/icon_detect/
+weights/icon_detect_v1_5/
+weights/icon_detect_v1_5_2/
+.gradio
+__pycache__/
+debug.ipynb
+util/__pycache__/
+index.html?linkid=2289031
+wget-log
+weights/icon_caption_florence_v2/
+
+.env
