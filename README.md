@@ -1,4 +1,4 @@
-> This repository is an adapted version of the original project available at: [https://github.com/NON906/omniparser-autogui-mcp9](https://github.com/NON906/omniparser-autogui-mcp). We gratefully acknowledge the original authors for their work and contributions.
+> This repository is an adapted version of the original project available at: [https://github.com/NON906/omniparser-autogui-mcp](https://github.com/NON906/omniparser-autogui-mcp). We gratefully acknowledge the original authors for their work and contributions.
 
 # OmniParser MCP Server 
 
