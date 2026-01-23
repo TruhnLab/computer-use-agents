@@ -1,4 +1,4 @@
-> Credits go to Frederik Hauke, Marvin Gazibaric, Hanna Kreutzer and Patrick Wienholt
+> Credits go to Frederik Hauke, Marvin Gazibaric, Hanna Kreutzer and Patrick Wienholt - winners of the first internal "AI in Medicine Hackathon".
 
 # HospitalRun Navigation Agent
 
