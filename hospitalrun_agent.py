@@ -341,11 +341,11 @@ class HospitalRunAgent:
         
         self.client = OpenAI(
             api_key=api_key,
-            base_url="https://api.truhn.ai/openai/v1"
+            base_url=os.getenv("AZURE_OPENAI_ENDPOINT")
         )
         self.model = "gpt-5.4"
         
-        print(f"Using endpoint: https://api.truhn.ai/openai/v1")
+        print(f"Using endpoint: {os.getenv("AZURE_OPENAI_ENDPOINT")}")
         print(f"Model: {self.model}\n")
         self.computer_tools = ComputerUseTools()
         self.previous_response_id: Optional[str] = None

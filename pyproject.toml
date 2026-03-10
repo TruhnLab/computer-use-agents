@@ -1,5 +1,5 @@
 [project]
-name = "hackathon"
+name = "visualagent"
 version = "0.1.0"
 description = "HospitalRun Navigation Agent using Azure OpenAI Computer Use"
 readme = "README.md"
