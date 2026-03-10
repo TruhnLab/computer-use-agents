@@ -328,7 +328,7 @@ class HospitalRunAgent:
     """Agent for navigating HospitalRun using OpenAI Computer Use"""
 
     def __init__(self):
-        # Initialize OpenAI client with custom endpoint (truhn.ai)
+        # Initialize OpenAI client with custom endpoint
         api_key = os.getenv("AZURE_OPENAI_API_KEY")
         
         if not api_key:
