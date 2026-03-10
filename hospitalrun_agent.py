@@ -240,8 +240,13 @@ class ComputerUseTools:
                         "strg": "ctrl",
                         "ctrl": "ctrl",
                         "control": "ctrl",
+                        "meta": "win",
+                        "super": "win",
+                        "win": "win",
+                        "command": "win",
+                        "cmd": "win",
                         "alt": "alt",
-                        "option": "option",
+                        "option": "alt",
                         "shift": "shift",
                         "enter": "enter",
                         "return": "enter",
@@ -338,7 +343,7 @@ class HospitalRunAgent:
             api_key=api_key,
             base_url="https://api.truhn.ai/openai/v1"
         )
-        self.model = "computer-use-preview"
+        self.model = "gpt-5.4"
         
         print(f"Using endpoint: https://api.truhn.ai/openai/v1")
         print(f"Model: {self.model}\n")
@@ -489,7 +494,7 @@ After typing ANY text:
 If you cannot verify ALL 5 points above, DO NOT STOP - continue with corrective actions.
 
 === ACTION EXECUTION ===
-You control the computer through actions. Available actions are handled by the computer_use_preview tool.
+You control the computer through actions. Available actions are handled by the computer tool.
 
 Be methodical and thorough. Double-check your work. Verify every input. Only declare completion when task is fully verified.
 
@@ -498,7 +503,7 @@ OCR data and screenshots will be provided with each step to help you understand 
 
     def process_user_instruction(self, instruction: str, max_iterations: int = 50) -> List[Dict[str, Any]]:
         """
-        Process a user instruction using the Responses API with computer_use_preview tool
+        Process a user instruction using the Responses API with computer tool
 
         Args:
             instruction: The task to accomplish
@@ -532,16 +537,11 @@ OCR data and screenshots will be provided with each step to help you understand 
         ocr_text = self._format_ocr_data(ocr_words)
 
         # Create initial request
-        print("Sending initial request to computer-use-preview model...")
+        print("Sending initial request to computer use model...")
         try:
             response = self.client.responses.create(
                 model=self.model,
-                tools=[{
-                    "type": "computer_use_preview",
-                    "display_width": self.computer_tools.display_width,
-                    "display_height": self.computer_tools.display_height,
-                    "environment": "mac"
-                }],
+                tools=[{"type": "computer"}],
                 input=[{
                     "role": "user",
                     "content": [
@@ -551,12 +551,12 @@ OCR data and screenshots will be provided with each step to help you understand 
                         },
                         {
                             "type": "input_image",
-                            "image_url": f"data:image/png;base64,{screenshot_b64}"
+                            "image_url": f"data:image/png;base64,{screenshot_b64}",
+                            "detail": "original"
                         }
                     ]
                 }],
-                reasoning={"summary": "concise"},
-                truncation="auto"
+                reasoning={"summary": "concise"}
             )
 
             self.previous_response_id = response.id
@@ -608,12 +608,7 @@ OCR data and screenshots will be provided with each step to help you understand 
                             response = self.client.responses.create(
                                 model=self.model,
                                 previous_response_id=self.previous_response_id,
-                                tools=[{
-                                    "type": "computer_use_preview",
-                                    "display_width": self.computer_tools.display_width,
-                                    "display_height": self.computer_tools.display_height,
-                                    "environment": "mac"
-                                }],
+                                tools=[{"type": "computer"}],
                                 input=[{
                                     "role": "user",
                                     "content": [{
@@ -621,8 +616,7 @@ OCR data and screenshots will be provided with each step to help you understand 
                                         "text": "Please provide your next ACTION as a computer_call. What specific action should be taken right now?"
                                     }]
                                 }],
-                                reasoning={"summary": "concise"},
-                                truncation="auto"
+                                reasoning={"summary": "concise"}
                             )
                             self.previous_response_id = response.id
 
@@ -667,33 +661,43 @@ OCR data and screenshots will be provided with each step to help you understand 
                     })
                 print("  Acknowledging safety checks...\n")
 
-            # Execute the action
-            action = computer_call.action
+            # Execute all actions in the batch
             call_id = computer_call.call_id
-            
-            print(f"Action: {action.type}")
-            if hasattr(action, 'x') and hasattr(action, 'y'):
-                print(f"  Position: ({action.x}, {action.y})")
-            if hasattr(action, 'text'):
-                print(f"  Text: {action.text}")
-            if hasattr(action, 'keys'):
-                print(f"  Keys: {action.keys}")
+            actions = computer_call.actions
 
-            # Convert action object to dict for execute_action
-            action_dict = {"type": action.type}
-            for attr in ['x', 'y', 'button', 'text', 'keys', 'scroll_x', 'scroll_y', 'from_x', 'from_y', 'to_x', 'to_y', 'duration']:
-                if hasattr(action, attr):
-                    action_dict[attr] = getattr(action, attr)
+            for action in actions:
+                # Handle both dict and object action formats
+                def _get(obj, key, default=None):
+                    if isinstance(obj, dict):
+                        return obj.get(key, default)
+                    return getattr(obj, key, default)
 
-            execution_result = self.computer_tools.execute_action(action_dict)
-            
-            actions_log.append({
-                "iteration": iteration + 1,
-                "action": action_dict,
-                "result": execution_result
-            })
+                action_type = _get(action, 'type')
+                print(f"Action: {action_type}")
+                ax, ay = _get(action, 'x'), _get(action, 'y')
+                if ax is not None and ay is not None:
+                    print(f"  Position: ({ax}, {ay})")
+                if _get(action, 'text') is not None:
+                    print(f"  Text: {_get(action, 'text')}")
+                if _get(action, 'keys') is not None:
+                    print(f"  Keys: {_get(action, 'keys')}")
 
-            # Wait for action to complete
+                # Convert action to dict for execute_action
+                action_dict = {"type": action_type}
+                for attr in ['x', 'y', 'button', 'text', 'keys', 'scroll_x', 'scroll_y', 'from_x', 'from_y', 'to_x', 'to_y', 'duration']:
+                    val = _get(action, attr)
+                    if val is not None:
+                        action_dict[attr] = val
+
+                execution_result = self.computer_tools.execute_action(action_dict)
+
+                actions_log.append({
+                    "iteration": iteration + 1,
+                    "action": action_dict,
+                    "result": execution_result
+                })
+
+            # Wait for actions to complete
             time.sleep(1)
 
             # Take new screenshot
@@ -710,8 +714,9 @@ OCR data and screenshots will be provided with each step to help you understand 
                         "type": "computer_call_output",
                         "acknowledged_safety_checks": acknowledged_checks,
                         "output": {
-                            "type": "input_image",
-                            "image_url": f"data:image/png;base64,{screenshot_b64}"
+                            "type": "computer_screenshot",
+                            "image_url": f"data:image/png;base64,{screenshot_b64}",
+                            "detail": "original"
                         }
                     },
                     {
@@ -751,15 +756,9 @@ Based on this analysis, what is your NEXT ACTION? (Provide a computer_call)"""
                 response = self.client.responses.create(
                     model=self.model,
                     previous_response_id=self.previous_response_id,
-                    tools=[{
-                        "type": "computer_use_preview",
-                        "display_width": self.computer_tools.display_width,
-                        "display_height": self.computer_tools.display_height,
-                        "environment": "mac"
-                    }],
+                    tools=[{"type": "computer"}],
                     input=input_items,
-                    reasoning={"summary": "concise"},
-                    truncation="auto"
+                    reasoning={"summary": "concise"}
                 )
 
                 self.previous_response_id = response.id
@@ -808,9 +807,9 @@ Based on this analysis, what is your NEXT ACTION? (Provide a computer_call)"""
     def interactive_mode(self):
         """Run the agent in interactive mode where user can give multiple instructions"""
         print("\n" + "="*80)
-        print("HOSPITALRUN NAVIGATION AGENT (Computer Use Preview)")
+        print("HOSPITALRUN NAVIGATION AGENT (Computer Use)")
         print("="*80)
-        print("\nThis agent uses OpenAI's computer-use-preview model to navigate HospitalRun.")
+        print("\nThis agent uses OpenAI's computer use tool to navigate HospitalRun.")
         print("Give it instructions and it will use computer vision and automation to complete them.")
         print("\nCommands:")
         print("  - Type your instruction to execute a task")
