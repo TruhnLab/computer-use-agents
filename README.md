@@ -10,8 +10,8 @@ AI-powered agent for navigating and interacting with HospitalRun using Azure Ope
 1. Install Python dependencies:
 	```bash
 	uv init
-	uv venv hack_env
-	source hack_env/bin/activate
+	uv venv visualagent
+	source visualagent/bin/activate
 	uv pip install -r requirements.txt
 	```
 
@@ -21,12 +21,10 @@ AI-powered agent for navigating and interacting with HospitalRun using Azure Ope
 	npm install
 	```
 
-3. Configure Azure OpenAI in `.env`:
+3. Create a `.env` file and configure Azure OpenAI:
 ```env
 AZURE_OPENAI_ENDPOINT=your_endpoint
 AZURE_OPENAI_API_KEY=your_key
-AZURE_OPENAI_API_VERSION=2025-03-01-preview
-AZURE_OPENAI_DEPLOYMENT=your_deployment
 ```
 
 4. Install Tesseract OCR:
@@ -36,6 +34,9 @@ brew install tesseract
 
 # Ubuntu/Debian
 sudo apt-get install tesseract-ocr
+
+# Windows
+Download the installer from https://github.com/UB-Mannheim/tesseract/wiki
 ```
 
 ## Usage
@@ -45,7 +46,7 @@ You can run the agent in two ways:
 ### 1. Directly from the command line
 
 ```bash
-python hospitalrun_agent.py
+./start_webapp.py
 ```
 
 ### 2. Using the provided scripts

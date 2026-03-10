@@ -3,7 +3,7 @@ REM Activate the 'visualagent' conda environment
 CALL conda activate visualagent
 
 REM Navigate to the backend folder
-cd /d C:\Users\DEschweiler\Documents\ComputerUse\HospitalRunAgent\frontend
+cd /d frontend
 
 REM Run the backend app
 npm run dev

@@ -1,9 +1,9 @@
 @echo off
 REM Activate the 'visualagent' conda environment
-CALL conda activate visualagent
+CALL visualagent\Scripts\activate.bat
 
 REM Navigate to the backend folder
-cd /d C:\Users\DEschweiler\Documents\ComputerUse\HospitalRunAgent\backend
+cd /d backend
 
 REM Run the backend app
 python app.py

@@ -5,9 +5,9 @@ echo "🚀 Starting Computer Use Agent Web App"
 echo ""
 
 # Check if virtual environment exists
-if [ ! -d "hack_env" ]; then
-    echo "❌ Virtual environment 'hack_env' not found!"
-    echo "Please run: uv venv hack_env && source hack_env/bin/activate"
+if [ ! -d "visualagent" ]; then
+    echo "❌ Virtual environment 'visualagent' not found!"
+    echo "Please run: uv venv visualagent && source visualagent/bin/activate"
     exit 1
 fi
 
