@@ -270,6 +270,14 @@ class ComputerUseTools:
                 # Map all keys
                 mapped_keys = [map_key(k) for k in keys]
 
+                # IMPORTANT: Reorder keys so modifiers come first (required for hotkey)
+                modifier_order = ['ctrl', 'alt', 'shift', 'win']
+                modifiers = [k for k in mapped_keys if k in modifier_order]
+                non_modifiers = [k for k in mapped_keys if k not in modifier_order]
+                # Sort modifiers by standard order, then append non-modifiers
+                modifiers.sort(key=lambda x: modifier_order.index(x) if x in modifier_order else 99)
+                mapped_keys = modifiers + non_modifiers
+
                 # If multiple keys, use hotkey (for combinations like Cmd+A)
                 if len(mapped_keys) > 1:
                     # CRITICAL: Add delay before keyboard shortcuts for Electron apps
@@ -277,11 +285,15 @@ class ComputerUseTools:
                     time.sleep(0.5)
 
                     # Special handling for CTRL+A (select all)
-                    if len(mapped_keys) == 2 and 'ctrl' in mapped_keys and 'a' in mapped_keys:
+                    if len(mapped_keys) == 2 and 'ctrl' in mapped_keys and 'a' in [k.lower() for k in mapped_keys]:
                         print(f"⚠️  Attempting CTRL+A with extra verification...")
-                        # Try multiple times as fallback
+                        # Use keyDown/keyUp for more reliable modifier handling on Windows
                         for attempt in range(2):
-                            pyautogui.hotkey(*mapped_keys)
+                            pyautogui.keyDown('ctrl')
+                            time.sleep(0.05)
+                            pyautogui.press('a')
+                            time.sleep(0.05)
+                            pyautogui.keyUp('ctrl')
                             time.sleep(0.3)
                             if attempt == 0:
                                 print(f"   First attempt completed, trying again for reliability...")
