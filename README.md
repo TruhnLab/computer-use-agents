@@ -2,7 +2,7 @@
 
 # HospitalRun Navigation Agent
 
-AI-powered agent for navigating and interacting with HospitalRun using Azure OpenAI Computer Use and OCR. This project uses the [computer-use-preview model from OpenAI](https://platform.openai.com/docs/guides/tools-computer-use) for advanced computer interaction capabilities.
+AI-powered agent for navigating and interacting with HospitalRun using Azure OpenAI Computer Use and OCR. This project uses the [GPT-5.4 with the comptuter tool from OpenAI](https://platform.openai.com/docs/guides/tools-computer-use) for advanced computer interaction capabilities (successor of the computer-use-preview model).
 
 ## Setup
 
