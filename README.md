@@ -5,7 +5,7 @@ This repository contains all relevant code and material for our evaluation of au
 
 ---
 ## Computer-Use Agents
-Three autonomous agents were evaluated in our experiments:
+Three autonomous agents were evaluated in our experiments (Agents A–C). A fourth agent is an ongoing follow-up that was not part of the evaluation.
 
 ### Agent A ([omniparser_mcp](https://github.com/TruhnLab/computer-use-agents/tree/omniparser_mcp) branch)
 - GUI perception handled locally via OmniParser MCP server
@@ -22,6 +22,14 @@ Three autonomous agents were evaluated in our experiments:
 - Uses OpenAIs GPT-5.4 model with an updated computer tool
 
 All agents receive natural-language task instructions (listed in [tasks.json](./tasks.json)) to iteratively perceive the GUI, plan actions, and execute mouse and keyboard interactions. For comparability, they share the same predefined action set (mouse movement, clicks, scrolling, text input, keyboard shortcuts).
+
+## Follow-up Work
+
+### Multi-Agent Harness ([multi_agent_harness](https://github.com/TruhnLab/computer-use-agents/tree/multi_agent_harness) branch)
+- Developed after the evaluation and therefore **not part of the reported results**
+- Splits the agent into a text-only supervisor that maintains a todo list and a vision actioner that executes one item at a time
+- Local perception combines RapidOCR (text) with an OmniParser YOLO detector (icons, buttons, empty fields); completed steps must be confirmed by OCR evidence on screen
+- Model behind each role is configurable, plus a React/Flask web UI for task submission and live monitoring
 
 ## Execution Environment
 All experiments were conducted using [HospitalRun](https://hospitalrun.io/download), an open-source, offline demo Hospital Information System (HIS).
