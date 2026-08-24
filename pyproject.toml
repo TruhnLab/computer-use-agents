@@ -1,0 +1,21 @@
+[project]
+name = "multi-agent-harness"
+version = "0.1.0"
+description = "Hierarchical supervisor/actioner computer-use agent for GUI navigation, driven by OCR + icon detection and any OpenAI-compatible vision LLM"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "openai>=1.0.0",
+    "python-dotenv>=1.0.0",
+    "pyautogui>=0.9.54",
+    "pillow>=10.0.0",
+    "numpy>=1.0.0",
+    "requests>=2.0.0",
+    "urllib3>=1.0.0",
+    "rapidocr",
+    "onnxruntime",
+    "ultralytics",
+    "huggingface_hub",
+    "flask>=3.0.0",
+    "flask-cors>=4.0.0",
+]
