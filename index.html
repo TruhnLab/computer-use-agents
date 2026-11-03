@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Computer use for natural-language control of clinical software</title>
+  <meta name="author" content="Dennis Eschweiler, Daniel Truhn">
+  <meta name="description" content="A multi-agent harness that operates clinical software through its screen: a supervisor owns the plan, an actioner works one step at a time, and every step is verified against text recognised on screen.">
+  <meta name="theme-color" content="#f1f3f7">
+  <meta property="og:title" content="Computer use for natural-language control of clinical software">
+  <meta property="og:description" content="A supervisor owns the plan, an actioner works one step at a time, and every step is verified on screen.">
+  <link rel="icon" href="assets/media/lab-logo.svg" type="image/svg+xml">
+  <link rel="preload" href="assets/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="assets/css/site.css?v=2">
+  <script>document.documentElement.classList.add('js');</script>
+</head>
+<body>
+  <header class="bar">
+    <div class="wide bar-inner">
+      <a class="lab" href="https://truhn.ai/">
+        <img src="assets/media/lab-logo.svg" alt="" width="30" height="30">
+        <span>Lab for Artificial Intelligence in Medicine</span>
+      </a>
+      <nav aria-label="On this page">
+        <a class="link" href="#principle">How it works</a>
+        <a class="link" href="#study">Preliminary results</a>
+        <a class="link" href="#failures">Failures, replayed</a>
+        <a class="btn small" href="https://github.com/TruhnLab/computer-use-agents">
+          <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38v-1.33c-2.23.48-2.7-1.07-2.7-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.06-.49.06-.49.8.06 1.23.83 1.23.83.72 1.22 1.88.87 2.34.66.07-.52.28-.87.5-1.07-1.78-.2-3.65-.89-3.65-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48v2.2c0 .21.15.46.55.38A8 8 0 0 0 8 0Z"/></svg>
+          Code
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- ======================= header and teaser ======================= -->
+    <section class="hero wide">
+      <span class="eyebrow">Clinical computer use</span>
+      <h1><span class="name act">Computer use</span> for <span class="nowrap">natural-language</span> control of clinical software</h1>
+      <p class="authors"><span>Dennis Eschweiler</span><span>Daniel Truhn</span></p>
+      <p class="byline"><a href="https://truhn.ai/">Lab for Artificial Intelligence in Medicine</a> <span style="white-space:nowrap">&nbsp;·&nbsp; November 2026</span></p>
+
+      <!-- Animation 1 (teaser): from a clinician's request to a verified record -->
+      <figure class="player teaser" id="roles" data-scene="roles">
+        <div class="stage hook">
+          <div class="ask">
+            <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4.5 21a7.5 7.5 0 0 1 15 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            <p><span class="k">Clinician</span><span data-request></span></p>
+          </div>
+          <div class="hook-grid">
+            <section class="pane sup" data-pane="sup">
+              <header class="pane-head">
+                <span class="role"><i class="dot"></i>Supervisor</span>
+                <span class="kind">plans, never sees the screen</span>
+              </header>
+              <ol class="plan" data-plan></ol>
+            </section>
+            <section class="pane act" data-pane="act">
+              <header class="pane-head">
+                <span class="role"><i class="dot"></i>Actioner</span>
+                <span class="kind">acts on the screen, one item at a time</span>
+              </header>
+              <div class="screen" data-screen role="img" aria-label="Drawn patient form that fills itself in, field by field, each entry checked on screen">
+                <div class="win"><i></i><i></i><i></i><span>New Patient</span><b class="verified" data-count hidden></b></div>
+                <div class="form">
+                  <div class="fld" data-f="first"><span class="lbl">First Name *</span><span class="inp"><span class="val"></span><span class="caret"></span></span></div>
+                  <div class="fld" data-f="last"><span class="lbl">Last Name *</span><span class="inp"><span class="val"></span><span class="caret"></span></span></div>
+                  <div class="fld sel" data-f="sex"><span class="lbl">Sex</span><span class="inp"><span class="val"></span><span class="caret"></span></span></div>
+                  <div class="fld" data-f="dob"><span class="lbl">Date Of Birth</span><span class="inp"><span class="val"></span><span class="caret"></span></span>
+                    <div class="picker" aria-hidden="true">
+                      <div class="ph"><span>‹</span><b>October 2000</b><span>›</span></div>
+                      <div class="pg"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="on"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+                    </div>
+                  </div>
+                  <div class="fld" data-f="phone"><span class="lbl">Phone</span><span class="inp"><span class="val"></span><span class="caret"></span></span></div>
+                  <div class="fld" data-f="address"><span class="lbl">Address</span><span class="inp"><span class="val"></span><span class="caret"></span></span></div>
+                </div>
+                <div class="btns"><span class="b ghost" data-b="cancel">Cancel</span><span class="b" data-b="add">Add</span></div>
+                <div class="toast" data-toast></div>
+              </div>
+            </section>
+          </div>
+          <div class="packets" data-packets aria-hidden="true"></div>
+        </div>
+        <figcaption class="ctrl" data-ctrl></figcaption>
+      </figure>
+    </section>
+
+    <!-- ======================= overview: abstract and principle, on a band ======================= -->
+    <div class="band">
+      <section class="abstract wide">
+        <div class="narrow reveal">
+          <h2 class="small">Abstract</h2>
+          <p>Hospital information systems rarely offer programmatic access, but every one of them has a screen.
+            Computer-use agents operate software the way a person does: they read screenshots and use mouse and
+            keyboard, following instructions in natural language. In a preliminary study of three off-the-shelf agents
+            in HospitalRun, an open-source hospital information system, single interactions were reliable, while
+            multi-step workflows across several screens failed far more often, mostly through planning errors. The
+            harness described here is our follow-up. It splits the agent in two: a supervisor that owns the plan but
+            never sees the screen, and an actioner that sees the screen but only ever one step of the plan. A step
+            counts as done only when its result is found on screen, next to the right field label, and a check after
+            every action catches values typed into the wrong field. The harness works with any vision-capable model
+            behind an OpenAI-compatible endpoint and needs no access to the application beyond its screen.</p>
+          <p class="note wip"><span class="chip">Work in progress</span> Updates will follow, among them an evaluation on
+            the study tasks and the integration of a decision model.</p>
+        </div>
+      </section>
+
+      <section id="principle" class="wide">
+        <div class="head center narrow reveal">
+          <h2>How it works</h2>
+          <p class="explain">Models decide what to do in the hospital system. Deterministic checks decide whether an
+            entry landed where it should.</p>
+        </div>
+        <ol class="flow">
+          <li class="card reveal" style="--d:0s">
+            <div class="pic" aria-hidden="true">
+              <svg viewBox="0 0 200 120">
+                <rect x="22" y="12" width="156" height="96" rx="9" fill="#fff" stroke="#d9dee8"/>
+                <path d="M22 21a9 9 0 0 1 9-9h138a9 9 0 0 1 9 9v7H22z" fill="#f4f6fa"/>
+                <circle cx="32" cy="20" r="2.4" fill="#d6dbe4"/><circle cx="40" cy="20" r="2.4" fill="#d6dbe4"/><circle cx="48" cy="20" r="2.4" fill="#d6dbe4"/>
+                <rect x="34" y="40" width="44" height="6" rx="3" fill="#8a94a6"/>
+                <rect x="30" y="36" width="52" height="14" rx="4" fill="none" stroke="#f08c00" stroke-width="1.6"/>
+                <rect x="34" y="57" width="60" height="14" rx="4" fill="#fff" stroke="#d5dbe5"/>
+                <rect x="30" y="53" width="68" height="22" rx="5" fill="none" stroke="#2f6bff" stroke-width="1.6"/>
+                <rect x="108" y="40" width="36" height="6" rx="3" fill="#8a94a6"/>
+                <rect x="104" y="36" width="44" height="14" rx="4" fill="none" stroke="#f08c00" stroke-width="1.6"/>
+                <rect x="108" y="57" width="60" height="14" rx="4" fill="#fff" stroke="#d5dbe5"/>
+                <rect x="113" y="62" width="26" height="4.5" rx="2.2" fill="#2c3648"/>
+                <rect x="104" y="53" width="68" height="22" rx="5" fill="none" stroke="#f08c00" stroke-width="1.6"/>
+                <rect x="58" y="80" width="26" height="12" rx="4" fill="#2f6bff"/><text x="71" y="89" text-anchor="middle" font-size="8" font-weight="700" fill="#fff">e12</text>
+                <rect x="132" y="80" width="26" height="12" rx="4" fill="#f08c00"/><text x="145" y="89" text-anchor="middle" font-size="8" font-weight="700" fill="#fff">e14</text>
+              </svg>
+            </div>
+            <div class="txt">
+              <h3><span>1</span>Perceive</h3>
+              <p class="who det">Deterministic</p>
+              <p>Text recognition and an icon detector turn each screenshot into elements with stable IDs, plus a list of
+                what the last action changed.</p>
+            </div>
+          </li>
+          <li class="card reveal" style="--d:.06s">
+            <div class="pic" aria-hidden="true">
+              <svg viewBox="0 0 200 120">
+                <rect x="34" y="14" width="132" height="18" rx="6" fill="#fff" stroke="#e3e7ee"/>
+                <path d="M44 23l3 3 6-6" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <rect x="62" y="20.5" width="74" height="5" rx="2.5" fill="#b4bcc9"/>
+                <rect x="34" y="37" width="132" height="18" rx="6" fill="#fff" stroke="#e3e7ee"/>
+                <path d="M44 46l3 3 6-6" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <rect x="62" y="43.5" width="60" height="5" rx="2.5" fill="#b4bcc9"/>
+                <rect x="34" y="60" width="132" height="18" rx="6" fill="#e9efff" stroke="#97b4ff"/>
+                <path d="M45 64.5v9l7-4.5z" fill="#2f6bff"/>
+                <rect x="62" y="66.5" width="82" height="5" rx="2.5" fill="#2c3648"/>
+                <rect x="34" y="83" width="132" height="18" rx="6" fill="#fff" stroke="#e3e7ee"/>
+                <circle cx="48" cy="92" r="3.6" fill="none" stroke="#a3acbb" stroke-width="1.6"/>
+                <rect x="62" y="89.5" width="66" height="5" rx="2.5" fill="#d6dbe4"/>
+                <rect x="34" y="106" width="132" height="10" rx="5" fill="none" stroke="#c4b8ff" stroke-dasharray="3 3"/>
+                <text x="100" y="113.5" text-anchor="middle" font-size="7.5" font-weight="700" fill="#7a5cff">+ next step, once it is visible</text>
+              </svg>
+            </div>
+            <div class="txt">
+              <h3><span>2</span>Plan</h3>
+              <p class="who sup">Supervisor · language model</p>
+              <p>Turns the clinician's request into a to-do list, one to three steps ahead, extended as new screens
+                appear.</p>
+            </div>
+          </li>
+          <li class="card reveal" style="--d:.12s">
+            <div class="pic" aria-hidden="true">
+              <svg viewBox="0 0 200 120">
+                <rect x="36" y="16" width="128" height="18" rx="9" fill="#7a5cff"/>
+                <text x="100" y="28.5" text-anchor="middle" font-size="9" font-weight="700" fill="#fff">First Name = 'John'</text>
+                <path d="M100 38v10" stroke="#c4b8ff" stroke-width="2" stroke-linecap="round"/>
+                <path d="M96 45l4 4 4-4" fill="none" stroke="#c4b8ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <text x="38" y="64" font-size="8.5" font-weight="600" fill="#4a5568">First Name *</text>
+                <rect x="34" y="70" width="132" height="26" rx="6" fill="#fff" stroke="#2f6bff" stroke-width="1.5"/>
+                <rect x="31" y="67" width="138" height="32" rx="8" fill="none" stroke="#2f6bff" stroke-opacity=".18" stroke-width="3"/>
+                <text x="44" y="87.5" font-size="12" fill="#0e1626">John</text>
+                <rect x="72" y="76" width="1.6" height="14" fill="#0e1626"/>
+                <path d="M118 80v15.2l4.1-3.9 2.6 5.9 2.7-1.2-2.6-5.8h5.7z" fill="#0e1626" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div class="txt">
+              <h3><span>3</span>Act</h3>
+              <p class="who act">Actioner · vision model</p>
+              <p>Works on one item at a time, with only the patient details it needs, on the live screenshot.</p>
+            </div>
+          </li>
+          <li class="card reveal" style="--d:.18s">
+            <div class="pic" aria-hidden="true">
+              <svg viewBox="0 0 200 120">
+                <rect x="30" y="28" width="140" height="62" rx="10" fill="#16a34a" fill-opacity=".07" stroke="#16a34a" stroke-width="2"/>
+                <text x="42" y="47" font-size="9" font-weight="600" fill="#4a5568">First Name *</text>
+                <rect x="40" y="53" width="120" height="26" rx="6" fill="#fff" stroke="#d5dbe5"/>
+                <text x="50" y="70.5" font-size="12" fill="#0e1626">John</text>
+                <circle cx="168" cy="30" r="11" fill="#16a34a" stroke="#fff" stroke-width="2.5"/>
+                <path d="M162.5 30l3.8 3.8 7-7" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+                <text x="100" y="106" text-anchor="middle" font-size="8.5" font-weight="700" fill="#16a34a">value next to its label</text>
+              </svg>
+            </div>
+            <div class="txt">
+              <h3><span>4</span>Verify</h3>
+              <p class="who det">Deterministic</p>
+              <p>An entry counts as done only when its value sits next to the right field label. A value in the wrong field
+                raises an alarm.</p>
+            </div>
+          </li>
+          <li class="card reveal" style="--d:.24s">
+            <div class="pic" aria-hidden="true">
+              <svg viewBox="0 0 200 120">
+                <path d="M28 82 93 34M64 82 97 37M100 82V40M136 82 103 37M172 82 107 34" stroke="#d6dbe4" stroke-width="1.6"/>
+                <circle cx="100" cy="26" r="13" fill="#7a5cff"/>
+                <circle cx="100" cy="26" r="18" fill="none" stroke="#7a5cff" stroke-opacity=".2" stroke-width="4"/>
+                <rect x="94" y="21" width="12" height="10" rx="2" fill="none" stroke="#fff" stroke-width="1.8"/>
+                <path d="M97 25h6M97 28h4" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
+                <g font-size="7.2" font-weight="700" text-anchor="middle">
+                  <rect x="11" y="82" width="34" height="15" rx="7.5" fill="#e8f7ee"/><text x="28" y="92.2" fill="#16a34a">done</text>
+                  <rect x="47" y="82" width="34" height="15" rx="7.5" fill="#eef1f6"/><text x="64" y="92.2" fill="#5d6779">blocked</text>
+                  <rect x="83" y="82" width="34" height="15" rx="7.5" fill="#eef1f6"/><text x="100" y="92.2" fill="#5d6779">budget</text>
+                  <rect x="119" y="82" width="34" height="15" rx="7.5" fill="#fdecec"/><text x="136" y="92.2" fill="#e5484d">alarm</text>
+                  <rect x="155" y="82" width="34" height="15" rx="7.5" fill="#fff4e0"/><text x="172" y="92.2" fill="#b45f06">stuck</text>
+                </g>
+                <text x="100" y="113" text-anchor="middle" font-size="8.5" font-weight="700" fill="#7a5cff">replan · ask · stop</text>
+              </svg>
+            </div>
+            <div class="txt">
+              <h3><span>5</span>Escalate</h3>
+              <p class="who sup">Supervisor</p>
+              <p>Called only when an item is done or blocked, its budget runs out, an alarm fires or the screen stalls.</p>
+            </div>
+          </li>
+        </ol>
+        <p class="loop-note reveal"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13 8a5 5 0 1 1-1.6-3.7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M12 1.5V5H8.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Steps 2 to 5 repeat until no item is open and the final screen passes the same check.</p>
+      </section>
+    </div>
+
+    <!-- ======================= preliminary results ======================= -->
+    <section id="study" class="wide">
+      <div class="head center narrow reveal">
+        <span class="eyebrow">Preliminary · manuscript under review</span>
+        <h2>Where off-the-shelf agents struggle</h2>
+        <p class="explain">Our starting point: three off-the-shelf computer-use agents on eight routine tasks in
+          HospitalRun with synthetic patient data, ten runs per task and agent.</p>
+      </div>
+      <div class="results reveal">
+        <ul class="kpis">
+          <li class="kpi"><span class="kpi-l">Basic tasks</span><span class="kpi-v">98%</span><span class="kpi-n">success, such as changing a single field</span></li>
+          <li class="kpi"><span class="kpi-l">Multi-step workflows</span><span class="kpi-v">69%</span><span class="kpi-n">success, such as requesting a medication</span></li>
+          <li class="kpi"><span class="kpi-l">Main cause of failure</span><span class="kpi-v">Planning</span><span class="kpi-n">in 29 of the 40 unsuccessful runs, out of 240 in total; the other 11 were visual perception errors</span></li>
+        </ul>
+        <figure class="chart" id="success-chart">
+          <figcaption><b>Success rate per task</b><span>Three agents combined, 30 runs per task</span></figcaption>
+          <div class="bars" data-bars></div>
+          <div class="axis" aria-hidden="true"><span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span></div>
+          <div class="tip" role="tooltip" hidden></div>
+          <details class="tbl">
+            <summary>Per-agent values</summary>
+            <table data-source>
+              <thead><tr><th scope="col">Task</th><th scope="col">Agent A</th><th scope="col">Agent B</th><th scope="col">Agent C</th></tr></thead>
+              <tbody>
+                <tr data-group="Basic tasks"><th scope="row">Opening a patient profile</th><td>100%</td><td>100%</td><td>100%</td></tr>
+                <tr data-group="Basic tasks"><th scope="row">Editing information</th><td>100%</td><td>100%</td><td>100%</td></tr>
+                <tr data-group="Basic tasks"><th scope="row">Dropdown handling</th><td>100%</td><td>90%</td><td>100%</td></tr>
+                <tr data-group="Basic tasks"><th scope="row">Date picker handling</th><td>100%</td><td>80%</td><td>100%</td></tr>
+                <tr data-group="Multi-step workflows"><th scope="row">Creating a new patient profile</th><td>60%</td><td>90%</td><td>80%</td></tr>
+                <tr data-group="Multi-step workflows"><th scope="row">Requesting a new medication</th><td>40%</td><td>60%</td><td>50%</td></tr>
+                <tr data-group="Multi-step workflows"><th scope="row">Creating a new imaging request</th><td>50%</td><td>80%</td><td>100%</td></tr>
+                <tr data-group="Multi-step workflows"><th scope="row">Checking in a patient for a visit</th><td>90%</td><td>70%</td><td>60%</td></tr>
+              </tbody>
+            </table>
+          </details>
+        </figure>
+      </div>
+      <p class="note center fineprint">From our manuscript, currently under review; numbers may still change. The task
+        prompts are in <a href="https://github.com/TruhnLab/computer-use-agents/blob/main/tasks.json">tasks.json</a>.</p>
+    </section>
+
+    <!-- ======================= failures, replayed ======================= -->
+    <section id="failures" class="wide">
+      <div class="head center narrow reveal">
+        <h2>Two failure patterns, replayed</h2>
+        <p class="explain">Two patterns recurred in the study's multi-step tasks: input that went into the wrong field
+          after a date picker closed, and a form field that appeared only after an earlier entry. Here is what happened
+          in the study, and how the harness handles the same moment.</p>
+      </div>
+
+      <div class="cases reveal">
+        <div class="seg" role="tablist" aria-label="Failure pattern">
+          <button type="button" role="tab" aria-selected="true" aria-controls="case-focus" id="tab-focus" data-tab="case-focus">Input in the wrong field</button>
+          <button type="button" role="tab" aria-selected="false" aria-controls="case-dynamic" id="tab-dynamic" data-tab="case-dynamic" tabindex="-1">A field appears mid-form</button>
+        </div>
+
+        <!-- Case A: focus stays in the date field -->
+        <figure class="player case" id="case-focus" data-scene="focus" role="tabpanel" aria-labelledby="tab-focus">
+          <div class="variant seg small" aria-label="Agent">
+            <button type="button" data-variant="single" aria-pressed="true">Single-loop agent <span>study</span></button>
+            <button type="button" data-variant="harness" aria-pressed="false">Multi-agent harness</button>
+          </div>
+          <div class="request">
+            <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4.5 21a7.5 7.5 0 0 1 15 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            <p><span class="k">Task from the study</span>Create a new Patient profile with the following specifications: First Name: John,
+              Last Name: Doe, Sex: Male, Date of Birth: 10/10/2000, Phone: 0123&nbsp;45678910, Address: Pauwelsstraße 30, 52070 Aachen.</p>
+          </div>
+          <div class="stage duo">
+            <div class="screen" data-screen role="img" aria-label="Drawn patient form with date of birth and phone fields">
+              <div class="win"><i></i><i></i><i></i><span>New Patient</span></div>
+              <div class="form">
+                <div class="fld" data-f="first"><span class="lbl">First Name *</span><span class="inp"><span class="val"></span><span class="caret"></span></span></div>
+                <div class="fld" data-f="last"><span class="lbl">Last Name *</span><span class="inp"><span class="val"></span><span class="caret"></span></span></div>
+                <div class="fld" data-f="dob"><span class="lbl">Date Of Birth</span><span class="inp"><span class="val"></span><span class="caret"></span></span>
+                  <div class="picker" aria-hidden="true">
+                    <div class="ph"><span>‹</span><b>October 2000</b><span>›</span></div>
+                    <div class="pg"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="on"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+                  </div>
+                </div>
+                <div class="fld" data-f="phone"><span class="lbl">Phone</span><span class="inp"><span class="val"></span><span class="caret"></span></span></div>
+                <div class="fld wide-f" data-f="address"><span class="lbl">Address</span><span class="inp"><span class="val"></span><span class="caret"></span></span></div>
+              </div>
+              <div class="btns"><span class="b ghost" data-b="cancel">Cancel</span><span class="b" data-b="add">Add</span></div>
+            </div>
+            <aside class="side">
+              <div class="side-plan">
+                <span class="k">Supervisor's plan</span>
+                <ol class="plan" data-plan></ol>
+              </div>
+              <span class="k">Log</span>
+              <div class="log" data-log data-max="4"></div>
+            </aside>
+          </div>
+          <figcaption class="ctrl" data-ctrl></figcaption>
+        </figure>
+
+        <!-- Case B: Radiologist field appears after the imaging type -->
+        <figure class="player case" id="case-dynamic" data-scene="dynamic" role="tabpanel" aria-labelledby="tab-dynamic" hidden>
+          <div class="variant seg small" aria-label="Agent">
+            <button type="button" data-variant="single" aria-pressed="true">Single-loop agent <span>study</span></button>
+            <button type="button" data-variant="harness" aria-pressed="false">Multi-agent harness</button>
+          </div>
+          <div class="request">
+            <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4.5 21a7.5 7.5 0 0 1 15 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            <p><span class="k">Task from the study</span>Please add a new X-Ray imaging request for patient P00001 and the visit on
+              08/05/2025. The associated radiologist is Marie Curie.</p>
+          </div>
+          <div class="stage duo">
+            <div class="screen" data-screen role="img" aria-label="Drawn imaging request form">
+              <div class="win"><i></i><i></i><i></i><span>New Imaging Request</span></div>
+              <div class="form">
+                <div class="fld wide-f static" data-f="patient"><span class="lbl">Patient</span><span class="inp"><span class="val">John Doe · P00001</span><span class="caret"></span></span></div>
+                <div class="fld sel" data-f="visit"><span class="lbl">Visit *</span><span class="inp"><span class="val"></span><span class="caret"></span></span></div>
+                <div class="fld" data-f="type"><span class="lbl">Imaging Type *</span><span class="inp"><span class="val"></span><span class="caret"></span></span></div>
+                <div class="fld" data-f="rad"><span class="lbl">Radiologist</span><span class="inp"><span class="val"></span><span class="caret"></span></span></div>
+                <div class="fld" data-f="result"><span class="lbl">Result</span><span class="inp"><span class="val"></span><span class="caret"></span></span></div>
+                <div class="fld wide-f tall" data-f="notes"><span class="lbl">Notes</span><span class="inp"><span class="val"></span><span class="caret"></span></span></div>
+              </div>
+              <div class="btns"><span class="b ghost" data-b="cancel">Cancel</span><span class="b" data-b="add">Add</span></div>
+              <div class="toast" data-toast></div>
+            </div>
+            <aside class="side">
+              <div class="side-plan">
+                <span class="k">Supervisor's plan</span>
+                <ol class="plan" data-plan></ol>
+              </div>
+              <span class="k">Log</span>
+              <div class="log" data-log data-max="4"></div>
+            </aside>
+          </div>
+          <figcaption class="ctrl" data-ctrl></figcaption>
+        </figure>
+
+        <p class="note center fineprint">Single-loop agent: the pattern as observed in the study. Multi-agent harness: how
+          its mechanisms respond to the same situation, step by step. This is an illustration of the mechanism, not an
+          evaluated result. Forms are drawn, with the synthetic patient data from the study tasks.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wide cols">
+      <div>
+        <p><a href="https://truhn.ai/">Lab for Artificial Intelligence in Medicine</a></p>
+        <p><a href="https://www.ukaachen.de/kliniken-institute/klinik-fuer-diagnostische-und-interventionelle-radiologie/klinik/">Department of Diagnostic and Interventional Radiology</a>, University Hospital RWTH Aachen</p>
+      </div>
+      <div>
+        <p>Each agent of the study and the harness live on their own branch of
+          <a href="https://github.com/TruhnLab/computer-use-agents">TruhnLab/computer-use-agents</a>. Experiments use
+          <a href="https://hospitalrun.io/">HospitalRun</a> with synthetic patient data.</p>
+        <p>Perception uses RapidOCR and the OmniParser icon detector.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/stage.js?v=2" defer></script>
+  <script src="assets/js/scenes.js?v=2" defer></script>
+  <script src="assets/js/site.js?v=2" defer></script>
+</body>
+</html>
