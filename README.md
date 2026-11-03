@@ -3,6 +3,8 @@
 
 This repository contains all relevant code and material for our evaluation of autonomous computer-use agents on a Hospital Information System (HIS). The materials are intended to provide an unified entry point for agent implementations and task definitions, enable reproducibility and comparison of different computer-use agent architectures and support research on autonomous GUI interaction in clinical software systems.
 
+🌐 **Project page:** [truhnlab.github.io/computer-use-agents](https://truhnlab.github.io/computer-use-agents/), with animated examples of the multi-agent harness and preliminary results.
+
 ---
 ## Computer-Use Agents
 Three autonomous agents were evaluated in our experiments (Agents A–C). A fourth agent is an ongoing follow-up that was not part of the evaluation.
