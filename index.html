@@ -4,14 +4,14 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Computer use for natural-language control of clinical software</title>
-  <meta name="author" content="Dennis Eschweiler, Daniel Truhn">
+  <meta name="author" content="Dennis Eschweiler, Frederik Hauke, Nikol Ignatova, Marvin Gazibaric, Hanna Kreutzer, Patrick Wienholt, Sven Nebelung, Jakob Nikolas Kather, Daniel Truhn">
   <meta name="description" content="A multi-agent harness that operates clinical software through its screen: a supervisor owns the plan, an actioner works one step at a time, and every step is verified against text recognised on screen.">
   <meta name="theme-color" content="#f1f3f7">
   <meta property="og:title" content="Computer use for natural-language control of clinical software">
   <meta property="og:description" content="A supervisor owns the plan, an actioner works one step at a time, and every step is verified on screen.">
   <link rel="icon" href="assets/media/lab-logo.svg" type="image/svg+xml">
   <link rel="preload" href="assets/fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="assets/css/site.css?v=2">
+  <link rel="stylesheet" href="assets/css/site.css?v=3">
   <script>document.documentElement.classList.add('js');</script>
 </head>
 <body>
@@ -38,15 +38,22 @@
     <section class="hero wide">
       <span class="eyebrow">Clinical computer use</span>
       <h1><span class="name act">Computer use</span> for <span class="nowrap">natural-language</span> control of clinical software</h1>
-      <p class="authors"><span>Dennis Eschweiler</span><span>Daniel Truhn</span></p>
-      <p class="byline"><a href="https://truhn.ai/">Lab for Artificial Intelligence in Medicine</a> <span style="white-space:nowrap">&nbsp;·&nbsp; November 2026</span></p>
+      <p class="authors"><span>Dennis Eschweiler<sup>1</sup></span><span>Frederik Hauke<sup>1</sup></span><span>Nikol Ignatova<sup>1</sup></span><span>Marvin Gazibaric<sup>1</sup></span><span>Hanna Kreutzer<sup>1</sup></span><span>Patrick Wienholt<sup>1</sup></span><span>Sven Nebelung<sup>1</sup></span><span>Jakob Nikolas Kather<sup>2</sup></span><span>Daniel Truhn<sup>1</sup></span></p>
+      <p class="byline"><sup>1</sup>&nbsp;<a href="https://truhn.ai/">Lab for Artificial Intelligence in Medicine</a>, University Hospital RWTH Aachen <span class="sep">·</span> <sup>2</sup>&nbsp;Else Kröner Fresenius Center for Digital Health, TU Dresden</p>
+      <p class="byline">November 2026</p>
 
-      <!-- Animation 1 (teaser): from a clinician's request to a verified record -->
+      <!-- Animation 1 (teaser): from a clinician's request to a verified record, for four study tasks -->
       <figure class="player teaser" id="roles" data-scene="roles">
+        <div class="examples seg small" aria-label="Example from the study">
+          <button type="button" data-variant="patient" aria-pressed="true">New patient</button>
+          <button type="button" data-variant="imaging" aria-pressed="false">Imaging request</button>
+          <button type="button" data-variant="medication" aria-pressed="false">Medication request</button>
+          <button type="button" data-variant="checkin" aria-pressed="false">Check-in</button>
+        </div>
         <div class="stage hook">
           <div class="ask">
             <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4.5 21a7.5 7.5 0 0 1 15 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-            <p><span class="k">Clinician</span><span data-request></span></p>
+            <p><span class="k">Clinician · task from the study</span><span data-request></span></p>
           </div>
           <div class="hook-grid">
             <section class="pane sup" data-pane="sup">
@@ -59,25 +66,16 @@
             <section class="pane act" data-pane="act">
               <header class="pane-head">
                 <span class="role"><i class="dot"></i>Actioner</span>
-                <span class="kind">acts on the screen, one item at a time</span>
+                <span class="kind">mouse and keyboard on the real screen</span>
               </header>
-              <div class="screen" data-screen role="img" aria-label="Drawn patient form that fills itself in, field by field, each entry checked on screen">
-                <div class="win"><i></i><i></i><i></i><span>New Patient</span><b class="verified" data-count hidden></b></div>
-                <div class="form">
-                  <div class="fld" data-f="first"><span class="lbl">First Name *</span><span class="inp"><span class="val"></span><span class="caret"></span></span></div>
-                  <div class="fld" data-f="last"><span class="lbl">Last Name *</span><span class="inp"><span class="val"></span><span class="caret"></span></span></div>
-                  <div class="fld sel" data-f="sex"><span class="lbl">Sex</span><span class="inp"><span class="val"></span><span class="caret"></span></span></div>
-                  <div class="fld" data-f="dob"><span class="lbl">Date Of Birth</span><span class="inp"><span class="val"></span><span class="caret"></span></span>
-                    <div class="picker" aria-hidden="true">
-                      <div class="ph"><span>‹</span><b>October 2000</b><span>›</span></div>
-                      <div class="pg"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="on"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-                    </div>
-                  </div>
-                  <div class="fld" data-f="phone"><span class="lbl">Phone</span><span class="inp"><span class="val"></span><span class="caret"></span></span></div>
-                  <div class="fld" data-f="address"><span class="lbl">Address</span><span class="inp"><span class="val"></span><span class="caret"></span></span></div>
+              <div class="screen desk" data-screen role="img" aria-label="A desktop with the hospital information system open; the actioner moves the mouse and types into its form, and every entry is checked on screen">
+                <div class="menubar" aria-hidden="true"><b>HospitalRun</b><span>File</span><span>Edit</span><span>View</span><span>Window</span><span class="clock">Tue 09:41</span></div>
+                <div class="app">
+                  <div class="win"><i></i><i></i><i></i><span data-title></span><b class="verified" data-count hidden></b></div>
+                  <div data-views></div>
+                  <div class="toast" data-toast></div>
                 </div>
-                <div class="btns"><span class="b ghost" data-b="cancel">Cancel</span><span class="b" data-b="add">Add</span></div>
-                <div class="toast" data-toast></div>
+                <div class="hud" data-hud aria-hidden="true"></div>
               </div>
             </section>
           </div>
@@ -255,6 +253,7 @@
           <div class="bars" data-bars></div>
           <div class="axis" aria-hidden="true"><span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span></div>
           <div class="tip" role="tooltip" hidden></div>
+          <p class="agents"><span><b>A</b>Claude Sonnet 4.5 in the Claude desktop app; screen parsed locally by OmniParser over MCP</span><span><b>B</b>OpenAI computer-use-preview; screenshots plus local OCR</span><span><b>C</b>OpenAI GPT-5.4 with the computer tool; same setup as B</span></p>
           <details class="tbl">
             <summary>Per-agent values</summary>
             <table data-source>
@@ -304,7 +303,9 @@
               Last Name: Doe, Sex: Male, Date of Birth: 10/10/2000, Phone: 0123&nbsp;45678910, Address: Pauwelsstraße 30, 52070 Aachen.</p>
           </div>
           <div class="stage duo">
-            <div class="screen" data-screen role="img" aria-label="Drawn patient form with date of birth and phone fields">
+            <div class="screen desk" data-screen role="img" aria-label="Drawn patient form with date of birth and phone fields">
+              <div class="menubar" aria-hidden="true"><b>HospitalRun</b><span>File</span><span>Edit</span><span>View</span><span>Window</span><span class="clock">Tue 09:41</span></div>
+              <div class="app">
               <div class="win"><i></i><i></i><i></i><span>New Patient</span></div>
               <div class="form">
                 <div class="fld" data-f="first"><span class="lbl">First Name *</span><span class="inp"><span class="val"></span><span class="caret"></span></span></div>
@@ -319,6 +320,7 @@
                 <div class="fld wide-f" data-f="address"><span class="lbl">Address</span><span class="inp"><span class="val"></span><span class="caret"></span></span></div>
               </div>
               <div class="btns"><span class="b ghost" data-b="cancel">Cancel</span><span class="b" data-b="add">Add</span></div>
+              </div>
             </div>
             <aside class="side">
               <div class="side-plan">
@@ -344,7 +346,9 @@
               08/05/2025. The associated radiologist is Marie Curie.</p>
           </div>
           <div class="stage duo">
-            <div class="screen" data-screen role="img" aria-label="Drawn imaging request form">
+            <div class="screen desk" data-screen role="img" aria-label="Drawn imaging request form">
+              <div class="menubar" aria-hidden="true"><b>HospitalRun</b><span>File</span><span>Edit</span><span>View</span><span>Window</span><span class="clock">Tue 09:41</span></div>
+              <div class="app">
               <div class="win"><i></i><i></i><i></i><span>New Imaging Request</span></div>
               <div class="form">
                 <div class="fld wide-f static" data-f="patient"><span class="lbl">Patient</span><span class="inp"><span class="val">John Doe · P00001</span><span class="caret"></span></span></div>
@@ -356,6 +360,7 @@
               </div>
               <div class="btns"><span class="b ghost" data-b="cancel">Cancel</span><span class="b" data-b="add">Add</span></div>
               <div class="toast" data-toast></div>
+              </div>
             </div>
             <aside class="side">
               <div class="side-plan">
@@ -391,8 +396,8 @@
     </div>
   </footer>
 
-  <script src="assets/js/stage.js?v=2" defer></script>
-  <script src="assets/js/scenes.js?v=2" defer></script>
-  <script src="assets/js/site.js?v=2" defer></script>
+  <script src="assets/js/stage.js?v=3" defer></script>
+  <script src="assets/js/scenes.js?v=3" defer></script>
+  <script src="assets/js/site.js?v=3" defer></script>
 </body>
 </html>

@@ -16,11 +16,28 @@
   const GLYPH = { pending: '○', active: '▶', done: '✓', failed: '✗', obsolete: '−' };
   const MARKS = ['ok', 'bad', 'missing', 'new'];
   // Keys that describe one moment only and fall back to these defaults on the next step.
-  const TRANSIENT = { boxes: [], click: false, alarm: false, press: null, retype: [], glow: null, fly: null, scan: null, planDelay: 0 };
+  const TRANSIENT = { boxes: [], click: false, alarm: false, press: null, retype: [], glow: null, fly: null, scan: null, snap: false, planDelay: 0 };
+  const SNAP_MS = 650;   // the screenshot flash and the perception boxes that follow it
+
+  const KEY_ICON = '<svg viewBox="0 0 20 14" aria-hidden="true"><rect x="1" y="1" width="18" height="12" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M4.5 4.5h1M8 4.5h1M11.5 4.5h1M15 4.5h.5M4.5 7.5h1M8 7.5h1M11.5 7.5h1M15 7.5h.5M6 10.5h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
+  const MOUSE_ICON = '<svg viewBox="0 0 14 20" aria-hidden="true"><rect x="1" y="1" width="12" height="18" rx="6" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M7 1v7M1 8h12" stroke="currentColor" stroke-width="1.5"/><path d="M1.6 7.2A6 6 0 0 1 7 1v7H1z" fill="currentColor" fill-opacity=".85"/></svg>';
 
   const clone = o => JSON.parse(JSON.stringify(o));
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const fmt = s => esc(s).replace(/`([^`]+)`/g, '<code>$1</code>');   // `x` renders as code
+
+  // A drawn form field, for screens built from a spec: { f, label, kind, value, options }.
+  // kind: 'sel' (dropdown, with `options` for its menu), 'date' (with a date picker),
+  // 'static' (read-only), 'row' (a search hit), 'wide', 'tall'.
+  const PICKER = '<div class="picker" aria-hidden="true"><div class="ph"><span>‹</span><b>October 2000</b><span>›</span></div>' +
+    `<div class="pg">${'<i></i>'.repeat(9)}<i class="on"></i>${'<i></i>'.repeat(18)}</div></div>`;
+  const fieldHTML = f =>
+    `<div class="fld ${f.kind || ''}" data-f="${f.f}">` +
+    (f.label ? `<span class="lbl">${esc(f.label)}</span>` : '') +
+    `<span class="inp"><span class="val">${esc(f.value || '')}</span><span class="caret"></span></span>` +
+    (/\bdate\b/.test(f.kind || '') ? PICKER : '') +
+    (f.options ? `<div class="menu" aria-hidden="true">${f.options.map((o, k) => `<span data-o="${k}">${esc(o)}</span>`).join('')}</div>` : '') +
+    '</div>';
 
   function fold(prev, patch) {
     const s = Object.assign(clone(prev), clone(TRANSIENT));
@@ -63,6 +80,9 @@
     this.toastEl = root.querySelector('[data-toast]');
     this.reqEl = root.querySelector('[data-request]');
     this.countEl = root.querySelector('[data-count]');
+    this.titleEl = root.querySelector('[data-title]');
+    this.hud = root.querySelector('[data-hud]');   // what the agent sends: mouse clicks, keystrokes
+    this.views = null;
     this.packets = root.querySelector('[data-packets]');
     this.panes = [...root.querySelectorAll('[data-pane]')];
     this.max = this.logEl ? Number(this.logEl.dataset.max) || 3 : 0;
@@ -82,12 +102,75 @@
     this.state = null;
   }
 
+  // Build the screen's views (one per application screen) from a spec; the teaser swaps examples this way.
+  Stage.prototype.build = function (views) {
+    const host = this.screen.querySelector('[data-views]');
+    if (!host) return;
+    host.textContent = '';
+    this.views = {};
+    for (const [key, v] of Object.entries(views)) {
+      const el = document.createElement('div');
+      el.className = 'view';
+      el.dataset.view = key;
+      el.innerHTML =
+        `<div class="form">${v.fields.map(fieldHTML).join('')}</div>` +
+        `<div class="btns">${(v.buttons || []).map(b => `<span class="b${b.ghost ? ' ghost' : ''}" data-b="${b.b}">${esc(b.text)}</span>`).join('')}</div>`;
+      host.append(el);
+      this.views[key] = { el, title: v.title };
+    }
+    this.fields = {};
+    this.screen.querySelectorAll('[data-f]').forEach(el => { this.fields[el.dataset.f] = el; });
+  };
+
   Stage.prototype.later = function (ms, fn) { this.timers.push(setTimeout(fn, ms)); };
   Stage.prototype.clear = function () {
     this.timers.forEach(clearTimeout);
     this.timers = [];
     if (this.packets) this.packets.textContent = '';
-    this.overlay.querySelectorAll('.scan').forEach(n => n.remove());
+    this.overlay.querySelectorAll('.scan, .perc').forEach(n => n.remove());
+    this.screen.classList.remove('snap');
+    if (this.hud) this.hud.classList.remove('on');
+  };
+
+  // The input display: a mouse click or the keystrokes being sent, shown briefly.
+  Stage.prototype.input = function (kind, text) {
+    if (!this.hud) return;
+    this.hud.innerHTML = (kind === 'mouse' ? MOUSE_ICON : KEY_ICON) + `<span>${esc(text)}</span>`;
+    this.hud.className = `hud on ${kind}`;
+    clearTimeout(this.hudOff);
+    this.hudOff = setTimeout(() => this.hud.classList.remove('on'), 900);
+  };
+
+  // A screenshot: a shutter flash, then the boxes perception finds on it (text in orange,
+  // empty fields and buttons in blue), as in the harness's annotated screenshots.
+  Stage.prototype.snapshot = function () {
+    this.screen.classList.remove('snap');
+    void this.screen.offsetWidth;
+    this.screen.classList.add('snap');
+    const base = this.screen.getBoundingClientRect();
+    // Measure text itself (a label spans its whole field; its words do not).
+    const rectOf = el => {
+      if (!el.firstChild || el.firstChild.nodeType !== 3) return el.getBoundingClientRect();
+      const r = document.createRange();
+      r.selectNodeContents(el.firstChild);
+      return r.getBoundingClientRect();
+    };
+    const box = (el, cls) => {
+      if (!el || el.closest('[hidden]')) return;
+      const q = rectOf(el);
+      if (!q.width) return;
+      const d = document.createElement('div');
+      d.className = `perc ${cls}`;
+      Object.assign(d.style, { left: `${q.left - base.left - 3}px`, top: `${q.top - base.top - 2}px`, width: `${q.width + 6}px`, height: `${q.height + 4}px` });
+      this.overlay.append(d);
+    };
+    this.screen.querySelectorAll('.fld').forEach(f => {
+      const val = f.querySelector('.val');
+      box(f.querySelector('.lbl'), 'txt');
+      if (val && val.textContent) box(val, 'txt'); else box(f.querySelector('.inp'), 'ico');
+    });
+    this.screen.querySelectorAll('.b').forEach(b => box(b, 'ico'));
+    this.later(SNAP_MS, () => this.overlay.querySelectorAll('.perc').forEach(n => n.remove()));
   };
 
   // Render a state. With `prev`, animate the change from it. Returns how long the animation runs (ms).
@@ -98,6 +181,8 @@
     const arrive = moved ? this.ms.move : 0;   // the screen reacts when the pointer gets there
     let busy = arrive;
     this.state = s;
+
+    if (animate && s.snap) this.snapshot();
 
     // A chip flies from the plan into the form; typing starts once it lands.
     let land = 0;
@@ -118,22 +203,55 @@
       const show = fs.show !== false;
       if (animate && show && ps.show === false) { el.classList.remove('appear'); void el.offsetWidth; el.classList.add('appear'); }
       el.hidden = !show;
+      const hover = s.at && s.at.startsWith(`${f}@`) ? s.at.split('@')[1] : null;   // pointer on a menu option
       const look = () => {
         el.classList.toggle('focus', !!fs.focus);
         el.classList.toggle('popup', !!fs.popup);
         for (const m of MARKS) el.classList.toggle(m, fs.mark === m);
+        el.querySelectorAll('[data-o]').forEach(o => o.classList.toggle('on', o.dataset.o === hover));
       };
       if (markAt) this.later(markAt, look); else look();
       if (fs.v === undefined) continue;   // static fields keep their markup
       const val = el.querySelector('.val');
       const was = ps.v || '';
-      if (animate && was !== fs.v) busy = Math.max(busy, this.type(val, was, s.retype.includes(f) ? '' : was, fs.v, typeAt));
-      else val.textContent = fs.v;
+      if (animate && was !== fs.v && el.classList.contains('sel')) {
+        val.textContent = was;   // a dropdown choice appears at once, when the click lands
+        const v = fs.v;
+        this.later(markAt, () => { val.textContent = v; });
+      } else if (animate && was !== fs.v) {
+        const from = s.retype.includes(f) ? '' : was;
+        busy = Math.max(busy, this.type(val, was, from, fs.v, typeAt));
+        // Echo the keystrokes: typed characters, or backspaces when the value shrinks.
+        if (this.hud && !el.classList.contains('sel')) {
+          let p = 0;
+          while (p < from.length && p < fs.v.length && from[p] === fs.v[p]) p++;
+          const typed = fs.v.slice(p), erased = from.length - p;
+          if (erased) this.later(typeAt, () => this.input('keys', `⌫ × ${erased}`));
+          if (typed) this.later(typeAt + erased * this.ms.type, () => this.input('keys', typed));
+        }
+      } else val.textContent = fs.v;
+    }
+
+    // Switch application screens (a click on a button that opens another view) when the pointer arrives.
+    if (this.views) {
+      const key = s.view || Object.keys(this.views)[0];
+      const swap = () => {
+        for (const [k, v] of Object.entries(this.views)) {
+          const on = k === key;
+          if (on && v.el.hidden && animate) { v.el.classList.remove('enter'); void v.el.offsetWidth; v.el.classList.add('enter'); }
+          v.el.hidden = !on;
+        }
+        if (this.titleEl) this.titleEl.textContent = this.views[key].title;
+      };
+      if (animate && prev.view !== s.view && arrive) this.later(arrive + 180, swap); else swap();
     }
 
     this.point(s.at, animate);
     if (animate && s.click) {
-      this.later(arrive, () => { this.cursor.classList.remove('click'); void this.cursor.offsetWidth; this.cursor.classList.add('click'); });
+      this.later(arrive, () => {
+        this.cursor.classList.remove('click'); void this.cursor.offsetWidth; this.cursor.classList.add('click');
+        this.input('mouse', 'left click');
+      });
     }
     this.screen.querySelectorAll('[data-b]').forEach(b => b.classList.remove('press'));
     if (s.press) {
@@ -187,11 +305,15 @@
   Stage.prototype.point = function (at, animate) {
     const base = this.screen.getBoundingClientRect();
     let x = base.width - 34, y = base.height - 26;   // parked in the corner
-    const field = this.fields[at];
-    const t = field ? field.querySelector('.inp') : at && this.screen.querySelector(`[data-b="${at}"]`);
+    // `at` names a field, a button (data-b), or a menu option as 'field@index'.
+    const [name, opt] = String(at || '').split('@');
+    const field = opt === undefined ? this.fields[name] : null;
+    const t = field ? field.querySelector('.inp')
+      : opt !== undefined ? this.fields[name] && this.fields[name].querySelector(`[data-o="${opt}"]`)
+      : at && this.screen.querySelector(`.view:not([hidden]) [data-b="${at}"], [data-b="${at}"]`);
     if (t && !t.closest('[hidden]')) {
       const r = t.getBoundingClientRect();
-      x = r.left - base.left + (field ? Math.min(54, r.width * 0.35) : r.width * 0.55);
+      x = r.left - base.left + (field ? Math.min(54, r.width * 0.35) : opt !== undefined ? Math.min(40, r.width * 0.4) : r.width * 0.55);
       y = r.top - base.top + r.height * 0.6;
     }
     this.cursor.style.transitionDuration = animate ? `${this.ms.move}ms` : '0s';
@@ -202,7 +324,7 @@
   Stage.prototype.fieldRect = function (el) {
     const base = this.screen.getBoundingClientRect();
     let l = Infinity, t = Infinity, r = -Infinity, b = -Infinity;
-    [el.querySelector('.lbl'), el.querySelector('.inp')].forEach(p => {
+    [el.querySelector('.lbl'), el.querySelector('.inp')].filter(Boolean).forEach(p => {
       const q = p.getBoundingClientRect();
       l = Math.min(l, q.left); t = Math.min(t, q.top); r = Math.max(r, q.right); b = Math.max(b, q.bottom);
     });
@@ -295,14 +417,15 @@
         if (animate) li.style.animationDelay = `${80 * entering++}ms`;   // several new items cascade in
       }
       const ticked = animate && !isNew && !wasDone && it.st === 'done';
-      li.className = `st-${it.st}${it.corr ? ' corr' : ''}${isNew && animate ? ' enter' : ''}${ticked ? ' ticked' : ''}`;
+      li.className = `st-${it.st}${it.corr ? ' corr' : ''}${it.rej ? ' rej' : ''}${isNew && animate ? ' enter' : ''}${ticked ? ' ticked' : ''}`;
       li.querySelector('.g').textContent = GLYPH[it.st] || '';
       li.querySelector('.t').textContent = it.text;
-      if (it.corr && !li.querySelector('.badge')) {
-        const badge = document.createElement('span');
-        badge.className = 'badge';
-        badge.textContent = 'fix';
-        li.append(badge);
+      // A badge marks a corrective item ('fix') or a claim the check just rejected ('rejected').
+      const label = it.rej ? 'rejected' : it.corr ? 'fix' : '';
+      let badge = li.querySelector('.badge');
+      if (label && !badge) { badge = document.createElement('span'); li.append(badge); }
+      if (badge) {
+        if (label) { badge.className = `badge${it.rej ? ' no' : ''}`; badge.textContent = label; } else badge.remove();
       }
       this.planEl.append(li);   // re-appending keeps the DOM in plan order
     }
@@ -371,14 +494,13 @@
       `<button type="button" class="icon" data-act="prev" aria-label="Previous step">${ICON.prev}</button>` +
       `<button type="button" class="icon" data-act="next" aria-label="Next step">${ICON.next}</button>` +
       '</div>' +
-      (scene.phases
-        ? `<ol class="phases">${scene.phases.map((p, k) => `<li><button type="button" data-phase="${k}"><span class="n">${k + 1}</span>${esc(p)}<span class="fill"></span></button></li>`).join('')}</ol>`
-        : '<ol class="ticks"></ol><span class="count"></span>') +
+      (scene.phases ? '<ol class="phases"></ol>' : '<ol class="ticks"></ol><span class="count"></span>') +
       '<p class="cap" aria-live="off"></p>';
     this.toggleBtn = ctrl.querySelector('[data-act="toggle"]');
     this.ticks = ctrl.querySelector('.ticks');
     this.count = ctrl.querySelector('.count');
-    this.phaseBtns = [...ctrl.querySelectorAll('[data-phase]')];
+    this.phaseList = ctrl.querySelector('.phases');
+    this.phaseBtns = [];
     this.cap = ctrl.querySelector('.cap');
 
     ctrl.addEventListener('click', e => {
@@ -414,6 +536,14 @@
     this.pause(false);
     this.variant = name;
     const v = this.scene.variants[name];
+    if (v.views) this.stage.build(v.views);
+    // Chapter names may differ per variant (the teaser's examples each have their own).
+    const phases = v.phases || this.scene.phases;
+    if (this.phaseList && phases) {
+      this.phaseList.innerHTML = phases.map((p, k) => `<li><button type="button" data-phase="${k}"><span class="n">${k + 1}</span>${esc(p)}<span class="fill"></span></button></li>`).join('');
+      this.phaseBtns = [...this.phaseList.querySelectorAll('[data-phase]')];
+      this.phase = -1;
+    }
     this.base = fold(fold(blank(), this.scene.base || {}), v.base || {});
     this.steps = v.steps;
     this.states = [];
@@ -500,7 +630,11 @@
   Player.prototype.advance = function () {
     if (!this.playing) return;
     if (this.i >= this.steps.length - 1) {
-      if (this.scene.loop) { this.show(-1, false); this.wait(900); } else this.pause(false);
+      if (this.scene.cycle) {   // on to the next variant, round and round
+        const names = Object.keys(this.scene.variants);
+        this.load(names[(names.indexOf(this.variant) + 1) % names.length]);
+        this.play();
+      } else if (this.scene.loop) { this.show(-1, false); this.wait(900); } else this.pause(false);
       return;
     }
     const before = this.phase;
