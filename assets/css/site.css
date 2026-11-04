@@ -101,10 +101,6 @@ button { font-family: inherit; }
   font-size: clamp(30px, 4.2vw, 50px); line-height: 1.15; letter-spacing: -.03em; font-weight: 560; color: var(--ink-2);
 }
 .hero h1 .name { font-weight: 780; color: var(--ink); }
-.hero h1 .act {
-  background: linear-gradient(100deg, var(--accent) 10%, var(--accent-2) 90%);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-}
 .authors { display: flex; justify-content: center; flex-wrap: wrap; gap: 4px 22px; max-width: 920px; margin: 24px auto 0; font-size: 17px; font-weight: 600; color: var(--ink); }
 .authors sup, .byline sup { margin-left: 1px; font-size: .62em; font-weight: 600; color: var(--muted); }
 .byline .sep { margin: 0 6px; }
