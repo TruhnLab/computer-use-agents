@@ -1,13 +1,29 @@
 
-# 💻 Computer-Use Agents Evaluation
+# 💻 Computer-Use Agents for Hospital Information Systems
 
-This repository contains all relevant code and material for our evaluation of autonomous computer-use agents on a Hospital Information System (HIS). The materials are intended to provide an unified entry point for agent implementations and task definitions, enable reproducibility and comparison of different computer-use agent architectures and support research on autonomous GUI interaction in clinical software systems.
+This repository holds our work on autonomous computer-use agents that operate a Hospital Information System (HIS) through its graphical interface, the way a person does. Each agent has its own branch: the harness we are developing now, and the three agents of our submitted evaluation study.
 
-🌐 **Project page:** [truhnlab.github.io/computer-use-agents](https://truhnlab.github.io/computer-use-agents/), with animated examples of the multi-agent harness and preliminary results.
+🌐 **Project page:** [truhnlab.github.io/computer-use-agents](https://truhnlab.github.io/computer-use-agents/), with animated examples and preliminary results.
 
 ---
-## Computer-Use Agents
-Three autonomous agents were evaluated in our experiments (Agents A–C). A fourth agent is an ongoing follow-up that was not part of the evaluation.
+## Current Work: Decision-Model Harness
+
+**Branch: [decision_model_harness](https://github.com/TruhnLab/computer-use-agents/tree/decision_model_harness)**
+
+Our most advanced agent. It works from screenshots only and with self-hosted models, so it can run inside a hospital network.
+
+- **Planner:** a chat model writes the steps for a screen. It is called a few times per request, not for every step
+- **Decision model:** answers the short questions in between (which click leads on, did the step work, is the request complete) with one of the given options and a probability
+- **Code, without a model:** finds fields from their labels, types, and checks every entry on screen, with RapidOCR for text and a YOLO detector for empty fields and icons
+- Runs with a chat model alone if no decision model is available
+- React/Flask web console to give requests and watch the agent work
+
+> **Status:** in development. This agent has not been evaluated yet and is **not part of the results of the study below**.
+
+---
+## Submitted Study: Agents A–C
+
+Three autonomous agents were evaluated on a HIS (Agents A–C). This part of the repository is described in a manuscript that is currently under review. It provides the agent implementations and task definitions to enable reproducibility and comparison of different computer-use agent architectures.
 
 ### Agent A ([omniparser_mcp](https://github.com/TruhnLab/computer-use-agents/tree/omniparser_mcp) branch)
 - GUI perception handled locally via OmniParser MCP server
@@ -23,17 +39,9 @@ Three autonomous agents were evaluated in our experiments (Agents A–C). A four
 - Successor of the computer-use-preview model
 - Uses OpenAIs GPT-5.4 model with an updated computer tool
 
-All agents receive natural-language task instructions (listed in [tasks.json](./tasks.json)) to iteratively perceive the GUI, plan actions, and execute mouse and keyboard interactions. For comparability, they share the same predefined action set (mouse movement, clicks, scrolling, text input, keyboard shortcuts).
+The three agents receive natural-language task instructions (listed in [tasks.json](./tasks.json)) to iteratively perceive the GUI, plan actions, and execute mouse and keyboard interactions. For comparability, they share the same predefined action set (mouse movement, clicks, scrolling, text input, keyboard shortcuts).
 
-## Follow-up Work
-
-### Multi-Agent Harness ([multi_agent_harness](https://github.com/TruhnLab/computer-use-agents/tree/multi_agent_harness) branch)
-- Developed after the evaluation and therefore **not part of the reported results**
-- Splits the agent into a text-only supervisor that maintains a todo list and a vision actioner that executes one item at a time
-- Local perception combines RapidOCR (text) with an OmniParser YOLO detector (icons, buttons, empty fields); completed steps must be confirmed by OCR evidence on screen
-- Model behind each role is configurable, plus a React/Flask web UI for task submission and live monitoring
-
-## Execution Environment
+### Execution Environment
 All experiments were conducted using [HospitalRun](https://hospitalrun.io/download), an open-source, offline demo Hospital Information System (HIS).
 
 **System:**
@@ -42,5 +50,6 @@ All experiments were conducted using [HospitalRun](https://hospitalrun.io/downlo
 - 128 GB RAM
 - NVIDIA RTX 4090 (24 GB)
 
+---
 ## Deployment
-Instructions for running or using the agents can be found in the respective branches.
+Instructions for running the agents can be found in the respective branches.
