@@ -1,0 +1,17 @@
+[project]
+name = "computer-use-agent"
+version = "0.1.0"
+description = "An agent that works in the window in front on a desktop, from screenshots only, with self-hosted models."
+readme = "README.md"
+requires-python = ">=3.13"
+
+# The dependencies are in requirements.txt: this is an application that is run
+# from its folder, not a package that is installed.
+
+[tool.ruff]
+line-length = 110
+extend-exclude = ["eval", "frontend", "logs", "notes", "message_board"]
+
+[tool.ruff.lint]
+# pycodestyle, pyflakes, import order
+select = ["E", "W", "F", "I"]
