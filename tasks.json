@@ -1,0 +1,38 @@
+{
+  "basic": [
+    {
+      "task": "Opening a patient profile",
+      "prompt": "Please open the profile of patient P00001."
+    },
+    {
+      "task": "Editing information",
+      "prompt": "Please change the last name of patient P00001 to Doe-Doe."
+    },
+    {
+      "task": "Dropdown handling",
+      "prompt": "Please add A+ as blood type for patient P00001."
+    },
+    {
+      "task": "Date picker handling",
+      "prompt": "Please set the date of birth to 01/01/1990 for patient P00001."
+    }
+  ],
+  "multi_step": [
+    {
+      "task": "Creating a new patient profile",
+      "prompt": "Create a new Patient profile with the following specifications:\nFirst Name: John,\nLast Name: Doe,\nSex: Male,\nDate of Birth: 10/10/2000,\nPhone: 0123 45678910,\nAddress: Pauwelsstraße 30, 52070 Aachen."
+    },
+    {
+      "task": "Requesting a new medication",
+      "prompt": "Please request a new medication for patient P00001 and the visit on 09/01/2025: Omeprazol 10 mg, Prescription: 1-0-0, Quantity: 5."
+    },
+    {
+      "task": "Creating a new imaging request",
+      "prompt": "Please add a new X-Ray imaging request for patient P00001 and the visit on 08/05/2025. The associated radiologist is Marie Curie."
+    },
+    {
+      "task": "Checking in a patient for a visit",
+      "prompt": "Please locate and check in patient P00001 for a followup visit type now. The stated reason for the visit is persistent tiredness."
+    }
+  ]
+}
